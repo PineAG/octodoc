@@ -22,6 +22,9 @@ export const getStaticProps = (async (context) => {
     const propsPath: string[] = (context.params?.file as string[]) ?? ["unknown"]
     const data = await getPathData(propsPath)
 
+
+    console.log("OK?", data)
+
     if (data === null) {
         return {notFound: true}
     }

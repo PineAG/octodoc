@@ -1,5 +1,6 @@
 import {promises as fs} from "fs"
 import path from "path"
+import { ILoadFileResult, canBeRendered, loadSourceFile } from "./loadUtils"
 
 export interface IDirData {
     type: "dir"
@@ -16,6 +17,7 @@ export interface IFileData {
     type: "file"
     parent: string[]
     name: string
+    content: ILoadFileResult
 }
 
 export type PathData = IDirData | IFileData
@@ -33,34 +35,65 @@ export async function* walkDataRoot(): AsyncGenerator<string[]> {
 export async function getPathData(propsPath: string[]): Promise<PathData | null> {
     const root = getDataRoot()
     const filePath = path.join(root, ...propsPath)
-    console.log(filePath)
 
     try {
         await fs.access(filePath, fs.constants.F_OK)
     } catch(ex) {
-        console.log("SHIT")
         return null;
     }
 
-    const stat = await fs.stat(root)
+    const stat = await fs.stat(filePath)
 
     if (stat.isDirectory()) {
-        return {
-            type: "dir",
-            name: "test",
-            parent: [],
-            children: {
-                dirs: [],
-                files: []
+        let indexFile: string | undefined
+        let dirs: string[] = []
+        let files: string[] = []
+
+        for(const ch of await fs.readdir(filePath, {withFileTypes: true})) {
+            if (ch.isDirectory()) {
+                dirs.push(ch.name)
+            } else if (isIndexFile(ch.name)) {
+                if (indexFile) {
+                    throw Error(`Multiple index files in ${filePath}`)
+                }
+                indexFile = ch.name
+            } else if (canBeRendered(ch.name)) {
+                files.push(ch.name)
             }
         }
-    } else if (stat.isFile()) {
+
+        let indexData = indexFile ? await renderFile([...propsPath, indexFile]) : undefined
+
         return {
-            type: "file",
-            name: "test",
-            parent: [],
+            type: "dir",
+            name: propsPath[propsPath.length - 1] ?? "/",
+            parent: propsPath.slice(0, propsPath.length - 1),
+            children: {
+                dirs,
+                files
+            },
+            indexFile: indexData
         }
+    } else if (stat.isFile()) {
+        return renderFile(propsPath)
     } else {
         return null
     }
+}
+
+async function renderFile(propsPath: string[]): Promise<IFileData> {
+    const root = getDataRoot()
+    const filePath = path.join(root, ...propsPath)
+    const content = await loadSourceFile(filePath, propsPath.slice(0, propsPath.length-1))
+
+    return {
+        type: "file",
+        parent: propsPath.slice(0, propsPath.length - 1),
+        name: propsPath[propsPath.length - 1],
+        content
+    }
+}
+
+function isIndexFile(name: string): boolean {
+    return name.startsWith("index.")
 }
