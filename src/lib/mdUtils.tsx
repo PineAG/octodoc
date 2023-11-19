@@ -100,9 +100,16 @@ function* extractFullTextTerms(source: string): Generator<string> {
     const segments = source.split(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s \n]+/g)
     for(const s of segments) {
         if (s.length === 0) continue;
-        for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
-            for(let start = 0; start < s.length - len + 1; start++) {
-                yield s.slice(start, start + len)
+
+        if(s.match(/^\w+$/)) {
+            for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
+                yield s.slice(0, len)
+            }
+        } else {    
+            for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
+                for(let start = 0; start < s.length - len + 1; start++) {
+                    yield s.slice(start, start + len)
+                }
             }
         }
     }
