@@ -23,7 +23,6 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
         const html = await unified()
             .use(remarkFrontMatter, ['yaml'])
             .use(() => (tree) => {
-                console.log(tree)
                 const root = tree as unist.Parent
                 const yamlValues = root.children.filter(it => it.type === "yaml").map(it => (it as unknown as {value: string})["value"])
                 root.children = root.children.filter(it => it.type !== "yaml")
@@ -31,7 +30,7 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
                     Object.assign(headerData, yaml.parse(obj))
                 }
             })
-            .use(() => (tree) => convertNode(tree, parentPath))
+            .use(() => (tree) => convertNode(tree, parentPath, context))
             .use(remarkParse)
             .use(remarkRehype)
             .use(rehypeStringify)
@@ -50,10 +49,14 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
     }
 }
 
-function convertNode(tree: unist.Node, parent: string[]) {
+function convertNode(tree: unist.Node, parent: string[], context: IFileLoaderExtractionContext) {
     visit(tree, "link", (node: mdast.Link) => {
         if (!node.url.startsWith("http")) {
             node.url = `/view/${parent.join("/")}/${node.url}`
         }
+    })
+
+    visit(tree, "image", (node: mdast.Image) => {
+        node.url = context.addMedia(node.url)
     })
 }

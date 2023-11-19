@@ -3,7 +3,7 @@ import path from "path"
 import { IPartitionReadWriteBackend } from "./partitionUtils"
 
 export function getAssetsRoot(): string {
-    return path.resolve(__dirname, "../../../public/assets") 
+    return path.resolve(process.cwd(), "public/assets") 
 }
 
 export function getAssetDirPath(indexName: string): string {
@@ -14,10 +14,18 @@ export async function ensureAssetDir(indexName: string) {
     await fs.mkdir(getAssetDirPath(indexName), {recursive: true})
 }
 
-const ASSET_Media = "medias"
-const ASSET_FullText = "fullText"
-const ASSET_Properties = "properties"
+export const ASSET_Media = "medias"
+export const ASSET_FullText = "fullText"
+export const ASSET_Properties = "properties"
 // const ASSET_Links = "links"
+
+export function getAssetUrl(type: string, name: string) {
+    return `/assets/${type}/${name}`
+}
+
+export function getAssetPath(type: string, name: string) {
+    return path.join(getAssetDirPath(type), name)
+}
 
 export class PartitionFsBackend<T> implements IPartitionReadWriteBackend {
     constructor(private readonly rootDir: string) {

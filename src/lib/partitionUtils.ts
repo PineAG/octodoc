@@ -87,6 +87,5 @@ export class PartitionWriter<T> extends PartitionReader<T> implements IPartition
         } else {
             await this.readwriteBackend.write(getPartitionName(name), s)
         }
-    } 
-
+    }
 }

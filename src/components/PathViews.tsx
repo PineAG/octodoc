@@ -1,24 +1,52 @@
 import { IDirData, IFileData, PathData } from "@/lib/fileUtils";
 import { renderData } from "@/lib/loadUtils";
+import dynamic from "next/dynamic";
+import Head from "next/head";
+import { DirChildrenList } from "./FileComponents";
 
 export function PathDataView(props: PathData) {
     if (props.type === "dir") {
         return <DirDataView {...props}/>
-    } else {
+    } else if (props.type === "file") {
         return <FileDataView {...props}/>
+    } else {
+        return null
     }
 }
 
 export function DirDataView(props: IDirData) {
     const indexContent = props.indexFile ? <FileContentView {...props.indexFile}/> : null
     return <div>
-        <div>{JSON.stringify(props.children)}</div>
+        <Head>
+            <title>{props.name}</title>
+        </Head>
+        <DirChildrenList
+            parent={props.name !== "/" ? {
+                title: "..",
+                url: `/view/${props.parent.join("/")}`
+            } : null}
+            dirs={props.children.dirs.map(name => ({title: name, url: `/view/${[...props.parent, props.name, name].join("/")}`}))}
+            files={props.children.files.map(name => ({title: name, url: `/view/${[...props.parent, props.name, name].join("/")}`}))}
+        />
         <div>{indexContent}</div>
     </div>
 }
 
 export function FileDataView(props: IFileData) {
-    return <FileContentView {...props}/>
+    return <>
+        <Head>
+            <title>{props.name}</title>
+        </Head>
+        <DirChildrenList
+            parent={{
+                title: "..",
+                url: `/view/${props.parent.join("/")}`
+            }}
+            dirs={[]}
+            files={[]}
+        />
+        <FileContentView {...props}/>
+    </>
 }
 
 export function FileContentView(props: IFileData) {

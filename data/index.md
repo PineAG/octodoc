@@ -6,4 +6,4 @@ test: '12345'
 
 **this is a README file**
 
-* [重云](重云.md)
+* [重云](原神/重云.md)

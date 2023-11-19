@@ -4,9 +4,9 @@ import { PathDataView } from "@/components/PathViews"
 
 export const getStaticPaths = (async () => {
     const filePaths: string[][] = []
-    // for await(const p of walkDataRoot()) {
-    //     filePaths.push(p)
-    // }
+    for await(const p of walkDataRoot()) {
+        filePaths.push(p)
+    }
 
     return {
       paths: filePaths.map(p => ({
@@ -19,11 +19,12 @@ export const getStaticPaths = (async () => {
   }) satisfies GetStaticPaths
 
 export const getStaticProps = (async (context) => {
-    const propsPath: string[] = (context.params?.file as string[]) ?? ["unknown"]
+    const propsPath: string[] | undefined = (context.params?.file as string[])
+    if (!propsPath) {
+      throw new Error(`Missing property file`)
+    }
+
     const data = await getPathData(propsPath)
-
-
-    console.log("OK?", data)
 
     if (data === null) {
         return {notFound: true}

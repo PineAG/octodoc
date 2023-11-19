@@ -10,7 +10,7 @@ export interface IDirData {
         dirs: string[]
         files: string[]
     },
-    indexFile?: IFileData
+    indexFile: IFileData | null
 }
 
 export interface IFileData {
@@ -23,13 +23,28 @@ export interface IFileData {
 export type PathData = IDirData | IFileData
 
 export function getDataRoot(): string {
-    return path.resolve(__dirname, "../../../data") 
+    const absolute = path.resolve(process.cwd(), "data")
+    return absolute 
 }
 
 export async function* walkDataRoot(): AsyncGenerator<string[]> {
     const root = getDataRoot()
-    console.warn(root)
-    yield []
+    yield* walkDataRootInternal(root, [])
+}
+
+async function* walkDataRootInternal(root: string, prefix: string[]): AsyncGenerator<string[]> {
+    yield prefix
+    const p = path.join(root, ...prefix)
+
+    for(const ch of await fs.readdir(p, {withFileTypes: true})) {
+        if (ch.isDirectory()) {
+            yield* walkDataRootInternal(root, [...prefix, ch.name])
+        } else if (isIndexFile(ch.name)) {
+            // pass
+        } else if (canBeRendered(ch.name)) {
+            yield [...prefix, ch.name]
+        }
+    }
 }
 
 export async function getPathData(propsPath: string[]): Promise<PathData | null> {
@@ -45,7 +60,7 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
     const stat = await fs.stat(filePath)
 
     if (stat.isDirectory()) {
-        let indexFile: string | undefined
+        let indexFile: string | null = null
         let dirs: string[] = []
         let files: string[] = []
 
@@ -62,7 +77,7 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
             }
         }
 
-        let indexData = indexFile ? await renderFile([...propsPath, indexFile]) : undefined
+        let indexData = indexFile ? await renderFile([...propsPath, indexFile]) : null
 
         return {
             type: "dir",
