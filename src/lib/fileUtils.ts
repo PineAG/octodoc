@@ -6,6 +6,7 @@ export interface IDirData {
     type: "dir"
     name: string
     parent: string[]
+    path: string[]
     children: {
         dirs: string[]
         files: string[]
@@ -16,6 +17,7 @@ export interface IDirData {
 export interface IFileData {
     type: "file"
     parent: string[]
+    path: string[]
     name: string
     content: ILoadFileResult
 }
@@ -83,6 +85,7 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
             type: "dir",
             name: propsPath[propsPath.length - 1] ?? "/",
             parent: propsPath.slice(0, propsPath.length - 1),
+            path: propsPath,
             children: {
                 dirs,
                 files
@@ -104,6 +107,7 @@ async function renderFile(propsPath: string[]): Promise<IFileData> {
     return {
         type: "file",
         parent: propsPath.slice(0, propsPath.length - 1),
+        path: propsPath,
         name: propsPath[propsPath.length - 1],
         content
     }

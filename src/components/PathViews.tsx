@@ -24,8 +24,8 @@ export function DirDataView(props: IDirData) {
                 title: props.parent[props.parent.length - 1] ?? "首页",
                 url: `/view/${props.parent.join("/")}`
             } : null}
-            dirs={props.children.dirs.map(name => ({title: name, url: `/view/${[...props.parent, props.name, name].join("/")}`}))}
-            files={props.children.files.map(name => ({title: name, url: `/view/${[...props.parent, props.name, name].join("/")}`}))}
+            dirs={props.children.dirs.map(name => ({title: name, url: `/view/${[...props.path, name].join("/")}`}))}
+            files={props.children.files.map(name => ({title: name, url: `/view/${[...props.path, name].join("/")}`}))}
         />
         <div>{indexContent}</div>
     </div>

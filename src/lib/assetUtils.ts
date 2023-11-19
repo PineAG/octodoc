@@ -33,7 +33,6 @@ export function getAssetPath(type: string, name: string) {
 export async function shouldDocumentAssetsUpdate(docPath: string[]): Promise<boolean> {
     const srcMTime = await getModifyTime(path.join(getDataRoot(), ...docPath)) ?? 0
     const cacheMTime = await readDocumentCacheModifyTime(docPath.join("/"))
-    console.log(srcMTime, cacheMTime, srcMTime > cacheMTime)
     return srcMTime > cacheMTime
 }
 
