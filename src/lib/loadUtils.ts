@@ -5,6 +5,7 @@ import type {ReactNode} from "react"
 import renderConfig from "@/config/render"
 import * as assetUtils from "@/lib/assetUtils"
 import { getDataRoot } from "./fileUtils"
+import { IDocumentCache, readDocumentCache, writeDocumentCache } from "./cacheUtils"
 
 export interface IFileRenderersConfig {
     [key: string]: IFileRenderer<any>
@@ -26,7 +27,7 @@ export function canBeRendered(fp: string): boolean {
     return !!(renderConfig as Partial<IFileRenderersConfig>)[category]
 }
 
-export async function loadSourceFile(fp: string, parentPropsPath: string[]): Promise<ILoadFileResult> {
+export async function loadSourceFile(fp: string, parentPropsPath: string[], name: string): Promise<ILoadFileResult> {
     const parentPath = path.dirname(fp)
     const defaultTitle = path.basename(fp)
     const category = path.extname(fp)
@@ -36,7 +37,7 @@ export async function loadSourceFile(fp: string, parentPropsPath: string[]): Pro
         throw new Error(`Renderer not found for '${category}'`)
     }
 
-    const ctx = new LoadFileContext(parentPropsPath)
+    const ctx = new LoadFileContext(parentPropsPath, name)
     const source = await fs.readFile(fp, {encoding: "utf-8"})
     const content = await renderer.loadFile(ctx, source, parentPropsPath)
     await ctx.finalize()
@@ -70,7 +71,7 @@ class LoadFileContext implements IFileLoaderExtractionContext {
     public medias: Map<string, string> = new Map<string, string>()
     public fullTextTerms: Map<string, number> = new Map()
 
-    constructor(private readonly parentPath: string[]) {
+    constructor(private readonly parentPath: string[], private name: string) {
 
     }
 
@@ -79,7 +80,9 @@ class LoadFileContext implements IFileLoaderExtractionContext {
     }
 
     addProperty(name: string, value: string): void {
-        throw new Error("Method not implemented.")
+        const values = this.properties.get(name) ?? []
+        values.push(value)
+        this.properties.set(name, values)
     }
 
     addMedia(name: string): string {
@@ -91,7 +94,8 @@ class LoadFileContext implements IFileLoaderExtractionContext {
     }
 
     addFullTextTerm(term: string): void {
-        throw new Error("Method not implemented.")
+        const c = this.fullTextTerms.get(term) ?? 0
+        this.fullTextTerms.set(term, c+1)
     }
 
     async finalize() {
@@ -103,6 +107,24 @@ class LoadFileContext implements IFileLoaderExtractionContext {
             const outPath = assetUtils.getAssetPath(assetUtils.ASSET_Media, outName)
 
             await lazyCopy(inPath, outPath)
+        }
+
+        const filePath = [...this.parentPath, this.name]
+        if(await assetUtils.shouldDocumentAssetsUpdate(filePath)) {
+            // update indices
+            const currentCache = await readDocumentCache(filePath)
+            const nextCache: IDocumentCache = {
+                fullTextTerms: Object.fromEntries(this.fullTextTerms.entries()),
+                properties: Object.fromEntries(this.properties.entries())
+            }
+
+            if (currentCache) {
+                await assetUtils.revertDocumentChangesOnAssets(filePath.join("/"), currentCache)
+            }
+
+            await assetUtils.applyDocumentOnAssets(filePath.join("/"), nextCache)
+            
+            await writeDocumentCache(filePath, nextCache)
         }
     }
     

@@ -36,8 +36,20 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
             .use(rehypeStringify)
             .process(source)
         
+        const properties = extractProperties(headerData)
+        for(const key of Object.keys(properties)) {
+            const values = properties[key]
+            for(const v of values) {
+                context.addProperty(key, v)
+            }
+        }
+
+        for(const term of extractFullTextTerms(source)) {
+            context.addFullTextTerm(term)
+        }
+
         return {
-            properties: headerData,
+            properties: properties,
             content: String(html)
         }
     }
@@ -59,4 +71,39 @@ function convertNode(tree: unist.Node, parent: string[], context: IFileLoaderExt
     visit(tree, "image", (node: mdast.Image) => {
         node.url = context.addMedia(node.url)
     })
+}
+
+function extractProperties(obj: any): Record<string, string[]> {
+    return Object.fromEntries(extractPropertiesInternal(obj))
+}
+
+function* extractPropertiesInternal(obj: any, prefix: string = ""): Generator<[string, string[]]> {
+    if(Array.isArray(obj)) {
+        yield [prefix, obj.map(it => it.toString())]
+    } else if(isPrimitive(obj)) {
+        yield [prefix, [obj.toString()]]
+    } else {
+        for(const [k, v] of Object.entries(obj)) {
+            yield* extractPropertiesInternal(v, `${prefix}/${k}`)
+        }
+    }
+}
+
+function isPrimitive(obj: {}): obj is object {
+    return typeof obj != "object" && obj !== null
+}
+
+const FullTextTermMinLength = 2
+const FullTextTermMaxLength = 20
+
+function* extractFullTextTerms(source: string): Generator<string> {
+    const segments = source.split(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s \n]+/g)
+    for(const s of segments) {
+        if (s.length === 0) continue;
+        for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
+            for(let start = 0; start < s.length - len + 1; start++) {
+                yield s.slice(start, start + len)
+            }
+        }
+    }
 }

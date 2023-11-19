@@ -99,7 +99,7 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
 async function renderFile(propsPath: string[]): Promise<IFileData> {
     const root = getDataRoot()
     const filePath = path.join(root, ...propsPath)
-    const content = await loadSourceFile(filePath, propsPath.slice(0, propsPath.length-1))
+    const content = await loadSourceFile(filePath, propsPath.slice(0, propsPath.length-1), propsPath[propsPath.length-1])
 
     return {
         type: "file",

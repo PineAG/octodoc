@@ -1,6 +1,5 @@
 import { IDirData, IFileData, PathData } from "@/lib/fileUtils";
 import { renderData } from "@/lib/loadUtils";
-import dynamic from "next/dynamic";
 import Head from "next/head";
 import { DirChildrenList } from "./FileComponents";
 
@@ -22,7 +21,7 @@ export function DirDataView(props: IDirData) {
         </Head>
         <DirChildrenList
             parent={props.name !== "/" ? {
-                title: "..",
+                title: props.parent[props.parent.length - 1] ?? "首页",
                 url: `/view/${props.parent.join("/")}`
             } : null}
             dirs={props.children.dirs.map(name => ({title: name, url: `/view/${[...props.parent, props.name, name].join("/")}`}))}
@@ -39,7 +38,7 @@ export function FileDataView(props: IFileData) {
         </Head>
         <DirChildrenList
             parent={{
-                title: "..",
+                title: props.parent[props.parent.length - 1],
                 url: `/view/${props.parent.join("/")}`
             }}
             dirs={[]}
