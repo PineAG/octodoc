@@ -4,6 +4,8 @@ import remarkFrontMatter from "remark-frontmatter"
 import * as unist from "unist"
 import {visit} from "unist-util-visit"
 
+import config from "@/../next.config"
+
 import remarkRehype from "remark-rehype"
 import yaml from "yaml"
 
@@ -16,6 +18,8 @@ export interface MarkdownResult {
     properties: Record<string, string[]>
     content: string
 }
+
+const basePath = config.basePath ?? ""
 
 export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
     async loadFile(context: IFileLoaderExtractionContext, source: string, parentPath: string[]): Promise<MarkdownResult> {
@@ -64,12 +68,12 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
 function convertNode(tree: unist.Node, parent: string[], context: IFileLoaderExtractionContext) {
     visit(tree, "link", (node: mdast.Link) => {
         if (!node.url.startsWith("http")) {
-            node.url = `/view/${parent.join("/")}/${node.url}`
+            node.url = `${basePath}/view/${parent.join("/")}/${node.url}`
         }
     })
 
     visit(tree, "image", (node: mdast.Image) => {
-        node.url = context.addMedia(node.url)
+        node.url = `${basePath}${context.addMedia(node.url)}`
     })
 }
 

@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    basePath: process.env["NEXT_BASEPATH"],
     webpack: (config, { isServer }) => {
         if (!isServer) {
           config.resolve.fallback = { fs: false };
