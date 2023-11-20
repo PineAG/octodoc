@@ -11,7 +11,7 @@ export default function Page() {
     } else {
         const query = params["keywords"]
         if (Array.isArray(query)) {
-            keywords = query.join(" ")
+            keywords = query.join("/")
         } else {
             keywords = query
         }

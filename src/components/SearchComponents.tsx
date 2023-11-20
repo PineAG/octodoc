@@ -110,7 +110,6 @@ class SearchStore {
 
     setKeywords(keywords: string) {
         this.keywords = keywords
-        console.log(keywords)
 
         if(this.autoSearch) {
             this.searchSource.next(keywords)
