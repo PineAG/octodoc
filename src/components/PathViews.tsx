@@ -2,6 +2,8 @@ import { IDirData, IFileData, PathData } from "@/lib/fileUtils";
 import { renderData } from "@/lib/loadUtils";
 import Head from "next/head";
 import { DirChildrenList } from "./FileComponents";
+import dynamic from "next/dynamic";
+import { SearchProvider, SearchWidget } from "@/components/SearchComponents";
 
 export function PathDataView(props: PathData) {
     if (props.type === "dir") {
@@ -19,6 +21,7 @@ export function DirDataView(props: IDirData) {
         <Head>
             <title>{props.name}</title>
         </Head>
+        <SearchWidget/>
         <DirChildrenList
             parent={props.name !== "/" ? {
                 title: props.parent[props.parent.length - 1] ?? "首页",
@@ -36,6 +39,7 @@ export function FileDataView(props: IFileData) {
         <Head>
             <title>{props.name}</title>
         </Head>
+        <SearchWidget/>
         <DirChildrenList
             parent={{
                 title: props.parent[props.parent.length - 1],

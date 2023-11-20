@@ -21,10 +21,17 @@ export function SearchPage(props: SearchPageProps) {
 }
 
 export function SearchWidget() {
-    return <SearchProvider autoSearch={false}>
-        <SearchInput/>
-        <SearchButton/>
-    </SearchProvider>
+    const [keywords, setKeywords] = useState("")
+    const router = useRouter()
+    return <Form.Control type="text" value={keywords} onChange={
+        evt => {
+            setKeywords(evt.target.value)
+        }}
+        onKeyUp={evt => {
+            if(evt.key !== "Enter") return;
+            router.push(`/search/${keywords}`)
+        }}
+    />
 }
 
 export function SearchButton() {
@@ -39,7 +46,12 @@ export function SearchInput() {
         <Form.Control type="text" value={store.keywords} onChange={
             evt => {
                 store.setKeywords(evt.target.value)
-            }} />
+            }}
+            onKeyUp={evt => {
+                if(evt.key !== "Enter") return;
+                store.search(store.keywords)
+            }}
+            />
     )}</Observer>
 }
 
