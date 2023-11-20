@@ -29,7 +29,7 @@ export function SearchWidget() {
         }}
         onKeyUp={evt => {
             if(evt.key !== "Enter") return;
-            router.push(`/search/${keywords}`)
+            router.push(`/search#${keywords}`)
         }}
     />
 }
@@ -60,7 +60,7 @@ export function useOnSearch(): () => void {
     const router = useRouter()
 
     return () => {
-        router.push(`/search/${encodeURI(store.keywords)}`)
+        router.push(`/search#${store.keywords}`)
     }
 }
 
@@ -74,7 +74,7 @@ export function SearchResultList() {
                 {results.result.map(it => (
                     <ListGroup.Item key={it}>
                         <Link onClick={() => {
-                            router.replace(`/search/${store.searchingKeywords}`)
+                            router.replace(`/search#${store.searchingKeywords}`)
                         }} href={`/view/${it}`}>{it}</Link>
                     </ListGroup.Item>
                 ))}
