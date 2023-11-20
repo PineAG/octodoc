@@ -5,6 +5,7 @@ import { PathDataView } from "@/components/PathViews"
 export const getStaticPaths = (async () => {
     const filePaths: string[][] = []
     for await(const p of walkDataRoot()) {
+        if(p.length === 0) continue;
         filePaths.push(p)
     }
 
