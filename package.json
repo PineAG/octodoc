@@ -10,9 +10,12 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
+    "lru-cache": "^10.0.3",
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-use": "^17.4.0",
+    "rxjs": "^7.8.1",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -25,6 +28,8 @@
     "crypto-js": "^4.2.0",
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
+    "mobx": "^6.11.0",
+    "mobx-react-lite": "^4.0.5",
     "postcss": "^8",
     "react-bootstrap": "^2.9.1",
     "react-icons": "^4.12.0",
