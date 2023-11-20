@@ -76,7 +76,9 @@ jobs:
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Static HTML export with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} NEXT_BASEURI="octodoc" next export
+        run: ${{ steps.detect-package-manager.outputs.runner }} next export
+        env:
+          NEXT_BASEURI: octodoc
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
