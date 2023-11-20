@@ -106,11 +106,11 @@ function* extractFullTextTerms(source: string): Generator<string> {
         if (s.length === 0) continue;
 
         if(s.match(/^\w+$/)) {
-            for(let len = FullTextTermMinLength; len <= FullTextTermMaxLength; len++) {
+            for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
                 yield s.slice(0, len)
             }
         } else {    
-            for(let len = FullTextTermMinLength; len <= FullTextTermMaxLength; len++) {
+            for(let len = FullTextTermMinLength; len <= Math.min(FullTextTermMaxLength, s.length); len++) {
                 for(let start = 0; start < s.length - len + 1; start++) {
                     yield s.slice(start, start + len)
                 }

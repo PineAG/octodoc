@@ -2,6 +2,7 @@
 const nextConfig = {
     basePath: process.env["NEXT_BASEPATH"],
     output: "export",
+    swcMinify: false,
     webpack: (config, { isServer }) => {
         if (!isServer) {
           config.resolve.fallback = { fs: false };
