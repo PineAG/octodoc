@@ -79,7 +79,7 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
             }
         }
 
-        let indexData = indexFile ? await renderFile([...propsPath, indexFile]) : null
+        let indexData = indexFile ? await renderFile(propsPath, [...propsPath, indexFile]) : null
 
         return {
             type: "dir",
@@ -93,22 +93,22 @@ export async function getPathData(propsPath: string[]): Promise<PathData | null>
             indexFile: indexData
         }
     } else if (stat.isFile()) {
-        return renderFile(propsPath)
+        return renderFile(propsPath, propsPath)
     } else {
         return null
     }
 }
 
-async function renderFile(propsPath: string[]): Promise<IFileData> {
+async function renderFile(propsPath: string[], filePropsPath: string[]): Promise<IFileData> {
     const root = getDataRoot()
-    const filePath = path.join(root, ...propsPath)
-    const content = await loadSourceFile(filePath, propsPath.slice(0, propsPath.length-1), propsPath[propsPath.length-1])
+    const filePath = path.join(root, ...filePropsPath)
+    const content = await loadSourceFile(filePath, filePropsPath.slice(0, -1), filePropsPath[filePropsPath.length-1])
 
     return {
         type: "file",
         parent: propsPath.slice(0, propsPath.length - 1),
         path: propsPath,
-        name: propsPath[propsPath.length - 1],
+        name: propsPath[propsPath.length - 1] ?? "/",
         content
     }
 }

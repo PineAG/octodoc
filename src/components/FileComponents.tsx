@@ -8,24 +8,12 @@ export interface ChildItem {
 }
 
 export interface DirChildrenListProps {
-    parent: ChildItem | null
     dirs: ChildItem[]
     files: ChildItem[]
 }
 
 export function DirChildrenList(props: DirChildrenListProps) {
-    let arrowUp: React.ReactNode = null
-    if (props.parent) {
-        arrowUp = <ListGroupItem>
-            <Link href={props.parent.url}>
-                <BsArrowUp className="me-2" />
-                {props.parent.title}
-            </Link>
-        </ListGroupItem>
-    }
-
     return <ListGroup>
-        {arrowUp}
         {props.dirs.map(it => (
             <ListGroupItem key={it.url}>
                 <Link href={it.url}>

@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import type { IFileLoaderExtractionContext, IFileRenderer } from "./loadUtils";
 import { unified } from "unified";
 import type * as mdast from "mdast"
+import { Accordion } from "react-bootstrap"
 
 export interface MarkdownResult {
     properties: Record<string, string[]>
@@ -59,8 +60,17 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
     }
     render(data: MarkdownResult): ReactNode {
         return <div>
-            <pre>{JSON.stringify(data.properties, null, 2)}</pre>
             <div dangerouslySetInnerHTML={{__html: data.content}}/>
+            <Accordion>
+                <Accordion.Item eventKey="0">
+                    <Accordion.Header>
+                        浏览属性
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        <pre>{JSON.stringify(data.properties, null, 2)}</pre>
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
         </div>
     }
 }

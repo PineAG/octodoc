@@ -27,7 +27,7 @@ export function canBeRendered(fp: string): boolean {
     return !!(renderConfig as Partial<IFileRenderersConfig>)[category]
 }
 
-export async function loadSourceFile(fp: string, parentPropsPath: string[], name: string): Promise<ILoadFileResult> {
+export async function loadSourceFile(fp: string, linkPath: string[]): Promise<ILoadFileResult> {
     const parentPath = path.dirname(fp)
     const defaultTitle = path.basename(fp)
     const category = path.extname(fp)
@@ -37,9 +37,9 @@ export async function loadSourceFile(fp: string, parentPropsPath: string[], name
         throw new Error(`Renderer not found for '${category}'`)
     }
 
-    const ctx = new LoadFileContext(parentPropsPath, name)
+    const ctx = new LoadFileContext(linkPath)
     const source = await fs.readFile(fp, {encoding: "utf-8"})
-    const content = await renderer.loadFile(ctx, source, parentPropsPath)
+    const content = await renderer.loadFile(ctx, source, linkPath.slice(0, -1))
     await ctx.finalize()
     return {
         title: defaultTitle,
@@ -71,7 +71,7 @@ class LoadFileContext implements IFileLoaderExtractionContext {
     public medias: Map<string, string> = new Map<string, string>()
     public fullTextTerms: Map<string, number> = new Map()
 
-    constructor(private readonly parentPath: string[], private name: string) {
+    constructor(private readonly linkPath: string[]) {
 
     }
 
@@ -87,9 +87,8 @@ class LoadFileContext implements IFileLoaderExtractionContext {
 
     addMedia(name: string): string {
         const extname = path.extname(name)
-        const relativePath = [...this.parentPath, name].join("/")
-        const shortName = crypto.SHA256(relativePath).toString() + extname
-        this.medias.set(relativePath, shortName)
+        const shortName = crypto.SHA256(name).toString() + extname
+        this.medias.set(name, shortName)
         return assetUtils.getAssetUrl(assetUtils.ASSET_Media, shortName)
     }
 
@@ -109,22 +108,21 @@ class LoadFileContext implements IFileLoaderExtractionContext {
             await lazyCopy(inPath, outPath)
         }
 
-        const filePath = [...this.parentPath, this.name]
-        if(await assetUtils.shouldDocumentAssetsUpdate(filePath)) {
+        if(await assetUtils.shouldDocumentAssetsUpdate(this.linkPath)) {
             // update indices
-            const currentCache = await readDocumentCache(filePath)
+            const currentCache = await readDocumentCache(this.linkPath)
             const nextCache: IDocumentCache = {
                 fullTextTerms: Object.fromEntries(this.fullTextTerms.entries()),
                 properties: Object.fromEntries(this.properties.entries())
             }
 
             if (currentCache) {
-                await assetUtils.revertDocumentChangesOnAssets(filePath.join("/"), currentCache)
+                await assetUtils.revertDocumentChangesOnAssets(this.linkPath.join("/"), currentCache)
             }
 
-            await assetUtils.applyDocumentOnAssets(filePath.join("/"), nextCache)
+            await assetUtils.applyDocumentOnAssets(this.linkPath.join("/"), nextCache)
             
-            await writeDocumentCache(filePath, nextCache)
+            await writeDocumentCache(this.linkPath, nextCache)
         }
     }
     

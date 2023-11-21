@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
-import { Container, Col, Form, Row, Button, ListGroup } from "react-bootstrap"
+import { Container, Col, Form, Row, Button, ListGroup, InputGroup } from "react-bootstrap"
 import {useRouter} from "next/navigation"
 import {useAsync} from "react-use"
 import {makeAutoObservable, observable, action, reaction} from "mobx"
@@ -13,25 +13,28 @@ export interface SearchPageProps {
     keywords: string
 }
 
-export function SearchPage(props: SearchPageProps) {
-    return <SearchProvider initValue={props.keywords} autoSearch={true} navigateBySearching={true}>
-        <SearchInput/>
-        <SearchResultList/>
-    </SearchProvider>
-}
-
 export function SearchWidget() {
     const [keywords, setKeywords] = useState("")
     const router = useRouter()
-    return <Form.Control type="text" value={keywords} onChange={
+    return <InputGroup>
+    <Form.Control type="text" placeholder="搜索" value={keywords} onChange={
         evt => {
             setKeywords(evt.target.value)
         }}
         onKeyUp={evt => {
             if(evt.key !== "Enter") return;
-            router.push(`/search#${keywords}`)
+            search()
         }}
     />
+    <Button onClick={search}>
+        <BsSearch/>
+    </Button>
+    </InputGroup>
+
+    function search() {
+        if (!keywords) return;
+        router.push(`/search#${keywords}`)
+    }
 }
 
 export function SearchButton() {
@@ -51,6 +54,7 @@ export function SearchInput() {
                 if(evt.key !== "Enter") return;
                 store.search(store.keywords)
             }}
+            placeholder="搜索"
             />
     )}</Observer>
 }
@@ -64,25 +68,22 @@ export function useOnSearch(): () => void {
     }
 }
 
-export function SearchResultList() {
+export function SearchResultConsumer(props: {children: (results: SearchResults) => React.ReactNode}) {
     const store = useContext(SearchContext)
-    const router = useRouter()
     return <Observer>{() => {
-        const results = store.searchResult
-        if (results.state === "success") {
-            return <ListGroup>
-                {results.result.map(it => (
-                    <ListGroup.Item key={it}>
-                        <Link onClick={() => {
-                            router.replace(`/search#${store.searchingKeywords}`)
-                        }} href={`/view/${it}`}>{it}</Link>
-                    </ListGroup.Item>
-                ))}
-            </ListGroup>
-        } else {
-            return <div>Loading...</div>
-        }
+        return <>{props.children(store.searchResult)}</>
     }}</Observer>
+}
+
+export function UpdateHashBySearchKeywords() {
+    const store = useContext(SearchContext)
+    useEffect(() => {
+        return reaction(() => store.searchingKeywords, () => {
+            location.hash=`#${store.searchingKeywords}`
+        })
+    }, [store])
+
+    return <></>
 }
 
 type SearchResults = {state: "pending"} | {state: "success", result: string[]}
