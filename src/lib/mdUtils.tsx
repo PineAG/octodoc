@@ -49,9 +49,10 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
             }
         }
 
-        for(const term of extractFullTextTerms(source)) {
+        for(const term of extractFullTextTerms(`${parentPath.join("/")}\n` + source)) {
             context.addFullTextTerm(term)
         }
+        
 
         return {
             properties: properties,
