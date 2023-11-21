@@ -78,7 +78,10 @@ export class MarkdownRenderer implements IFileRenderer<MarkdownResult> {
 function convertNode(tree: unist.Node, parent: string[], context: IFileLoaderExtractionContext) {
     visit(tree, "link", (node: mdast.Link) => {
         if (!node.url.startsWith("http")) {
-            node.url = `${basePath}/view/${parent.join("/")}/${node.url}`
+            if(!node.url.startsWith("/")) {
+                node.url = "/" + node.url
+            }
+            node.url = `${basePath}/view${node.url}`
         }
     })
 
@@ -111,7 +114,7 @@ const FullTextTermMinLength = 2
 const FullTextTermMaxLength = 20
 
 function* extractFullTextTerms(source: string): Generator<string> {
-    const segments = source.split(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s \n]+/g)
+    const segments = source.split(/[^\u4E00-\u9FFF\u3040-\u30FF\uAC00-\uD7AFa-zA-Z\u00C0-\u00FF]+/g)
     for(const s of segments) {
         if (s.length === 0) continue;
 
