@@ -1,46 +1,12 @@
 {
   "name": "octodoc",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://PineAG@github.com/PineAG/octodoc.git",
+  "author": "PineAG <pein.agail@gmail.com>",
+  "license": "MIT",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "js-yaml": "^4.1.0",
-    "lru-cache": "^10.0.3",
-    "next": "14.0.3",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-use": "^17.4.0",
-    "rxjs": "^7.8.1",
-    "unist-util-visit": "^5.0.0"
-  },
-  "devDependencies": {
-    "@types/crypto-js": "^4.2.1",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "bootstrap": "^5.3.2",
-    "crypto-js": "^4.2.0",
-    "eslint": "^8",
-    "eslint-config-next": "14.0.3",
-    "mobx": "^6.11.0",
-    "mobx-react-lite": "^4.0.5",
-    "postcss": "^8",
-    "react-bootstrap": "^2.9.1",
-    "react-icons": "^4.12.0",
-    "rehype-stringify": "^10.0.0",
-    "remark": "^15.0.1",
-    "remark-frontmatter": "^5.0.0",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.0.0",
-    "remark-stringify": "^11.0.0",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5",
-    "unified": "^11.0.4"
-  }
+  "workspaces": [
+    "./projects/*"
+  ]
 }

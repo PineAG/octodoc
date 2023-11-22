@@ -25,7 +25,7 @@ export interface IFileData {
 export type PathData = IDirData | IFileData
 
 export function getDataRoot(): string {
-    const absolute = path.resolve(process.cwd(), "data")
+    const absolute = path.resolve(process.cwd(), "..", "..", "data")
     return absolute 
 }
 
