@@ -8,5 +8,11 @@
   "private": true,
   "workspaces": [
     "./projects/*"
-  ]
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "scripts": {
+    "start": "concurrently \"cd projects/viewer && yarn dev\" \"cd projects/editor-server && yarn start:dev\" \"cd projects/editor-ui && yarn start\" "
+  }
 }
